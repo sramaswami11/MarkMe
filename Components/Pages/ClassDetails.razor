@@ -1,0 +1,49 @@
+@page "/classdetails/{ClassName}"
+@using global::MarkMe.Models
+@inject AttendanceService AttendanceService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<h3>Class Details: @ClassName</h3>
+
+@if (info != null)
+{
+    <div class="mb-3">
+        <label>Teacher</label>
+        <input class="form-control" @bind="info.Teacher" />
+    </div>
+    <div class="mb-3">
+        <label>Co-Teacher</label>
+        <input class="form-control" @bind="info.CoTeacher" />
+    </div>
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea class="form-control" rows="4" @bind="info.Description"></textarea>
+    </div>
+
+    <button class="btn btn-primary" @onclick="Save">Save</button>
+    <button class="btn btn-secondary ms-2" @onclick="Back">Back</button>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    [Parameter] public string ClassName { get; set; } = "";
+    private ClassTeacherInfo? info;
+
+    protected override void OnInitialized()
+    {
+        info = AttendanceService.GetTeacherInfo(ClassName);
+    }
+
+    private void Save()
+    {
+        if (info == null) return;
+        AttendanceService.SaveTeacherInfo(info);
+        Navigation.NavigateTo("/manageclasses");
+    }
+
+    private void Back() => Navigation.NavigateTo("/manageclasses");
+}

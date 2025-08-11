@@ -1,0 +1,20 @@
+[
+  {
+    "ClassName": "Athma Bhodh",
+    "Teacher": "Mr. Smith",
+    "CoTeacher": "Mrs. Johnson",
+    "Description": "Introductory physics"
+  },
+  {
+    "ClassName": "Class 2",
+    "Teacher": "Ms. Brown",
+    "CoTeacher": "Mr. White",
+    "Description": "Mathematics essentials"
+  },
+  {
+    "ClassName": "Class 3",
+    "Teacher": "Dr. Green",
+    "CoTeacher": "Ms. Blue",
+    "Description": "Chemistry basics"
+  }
+]

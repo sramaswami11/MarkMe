@@ -1,0 +1,123 @@
+﻿@page "/attendence"
+@page "/"
+@using global::MarkMe.Models
+@* @using global::Attendence.Services *@
+@rendermode InteractiveServer
+
+@inject AttendanceService AttendanceService
+
+<h3>Class Attendance</h3>
+
+<div class="mb-3 row">
+    <div class="col-md-4">
+        <label>Select Class:</label>
+        @* <select class="form-select" @bind="selectedClass" @bind:after="LoadStudents">
+            @foreach (var c in classList)
+            {
+                <option value="@c">@c</option>
+            }
+        </select> *@
+        <select class="form-select" @bind="selectedClass" @bind:after="OnClassOrDateChanged">
+            @foreach (var c in classList)
+            {
+                <option value="@c">@c</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label>Date:</label>
+        @* <input type="date" class="form-control" @bind="attendanceDate" /> *@
+        <input type="date" class="form-control" @bind="attendanceDate" @bind:after="OnClassOrDateChanged" />
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button class="btn btn-secondary" @onclick="ResetToAbsent">Reset to All Absent</button>
+    </div>
+</div>
+
+@if (students != null)
+{
+    <div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th style="width:160px">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in students)
+            {
+                <tr>
+                    <td>@student.Name</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn @(student.Status=="P"?"btn-success":"btn-outline-success")" @onclick="() => MarkPresent(student)">P</button>
+                            <button class="btn @(student.Status=="A"?"btn-danger":"btn-outline-danger")" @onclick="() => MarkAbsent(student)">A</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+
+    <div class="mt-2">
+        <button class="btn btn-primary" @onclick="SaveAttendance">Save Attendance</button>
+        <span class="ms-3 text-success">@saveMessage</span>
+    </div>
+}
+
+@code {
+    private string selectedClass = "";
+    private DateTime attendanceDate = DateTime.Today;
+    private List<string> classList = new();
+    private List<StudentAttendance>? students;
+    private string saveMessage = "";
+
+    protected override void OnInitialized()
+    {
+        classList = AttendanceService.GetClasses();
+        selectedClass = classList.FirstOrDefault() ?? "";
+        LoadStudents();
+    }
+
+    private void OnClassOrDateChanged()
+    {
+        LoadStudents();
+    }
+
+    private void LoadStudents()
+    {
+        students = AttendanceService.GetAttendanceForDateAndClass(attendanceDate, selectedClass);
+        saveMessage = "";
+        StateHasChanged();
+    }
+
+    private void ResetToAbsent()
+    {
+        if (students == null) return;
+        foreach(var st in students) st.Status = "A";
+    }
+
+    private void MarkPresent(StudentAttendance s)
+    {
+        s.Status = "P";
+    }
+    private void MarkAbsent(StudentAttendance s)
+    {
+        s.Status = "A";
+    }
+
+    private async Task SaveAttendance()
+    {
+        if (students == null) return;
+        await AttendanceService.SaveAttendanceByDate(attendanceDate, selectedClass, students);
+        await AttendanceService.SaveAttendanceByClass(attendanceDate, selectedClass, students);
+        saveMessage = "Saved!";
+    }
+}
+
+
+@code {
+
+}

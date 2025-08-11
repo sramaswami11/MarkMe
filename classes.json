@@ -1,0 +1,29 @@
+[
+  {
+    "ClassName": "Athma Bhodh",
+    "Students": [
+      "Ashwin",
+      "Arvind",
+      "Karthik",
+      "Keshav"
+    ]
+  },
+  {
+    "ClassName": "Class 2",
+    "Students": [
+      "Ethan",
+      "Fiona",
+      "George",
+      "Hannah"
+    ]
+  },
+  {
+    "ClassName": "Class 3",
+    "Students": [
+      "Ivy",
+      "Jack",
+      "Karen",
+      "Liam"
+    ]
+  }
+]

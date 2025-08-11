@@ -1,0 +1,191 @@
+@page "/manageclasses"
+@using global::MarkMe.Models
+@inject AttendanceService AttendanceService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<h3>Manage Classes</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h5>Classes</h5>
+        <ul class="list-group">
+            @foreach (var cls in classes)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="javascript:void(0)" @onclick="() => OpenClassDetails(cls.ClassName)">@cls.ClassName</a>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditClassName(cls)">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteClass(cls.ClassName)">Delete</button>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <strong>Students:</strong>
+                    <ul class="list-unstyled ms-3">
+                        @foreach (var s in cls.Students)
+                        {
+                            <li class="d-flex justify-content-between align-items-center mb-1">
+                                <span>@s</span>
+                                <span>
+                                    <button class="btn btn-sm btn-link" @onclick="() => EditStudent(cls.ClassName, s)">Edit</button>
+                                    <button class="btn btn-sm btn-link text-danger" @onclick="() => DeleteStudent(cls.ClassName, s)">Delete</button>
+                                </span>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="input-group mt-2">
+                        <input class="form-control" placeholder="New student name" @bind="newStudentName[cls.ClassName]" />
+                        <button class="btn btn-primary" @onclick="() => AddStudent(cls.ClassName)">Add</button>
+                    </div>
+                </li>
+
+            }
+        </ul>
+
+        <div class="input-group mt-3">
+            <input class="form-control" placeholder="New class name" @bind="newClassName" />
+            <button class="btn btn-success" @onclick="AddClass">Add Class</button>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h5>Editor</h5>
+        @if (editingClass != null)
+        {
+            <div>
+                <label>Editing Class:</label>
+                <input class="form-control mb-2" @bind="editingClassName" />
+                <button class="btn btn-primary me-2" @onclick="SaveClassName">Save</button>
+                <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+            </div>
+        }
+
+        @if (editingStudent != null)
+        {
+            <div class="mt-3">
+                <label>Editing Student (in @editingStudentClass):</label>
+                <input class="form-control mb-2" @bind="editingStudentName" />
+                <button class="btn btn-primary me-2" @onclick="SaveStudentEdit">Save</button>
+                <button class="btn btn-secondary" @onclick="CancelStudentEdit">Cancel</button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<ClassInfo> classes = new();
+    private string newClassName = "";
+    private Dictionary<string, string> newStudentName = new();
+    private ClassInfo? editingClass = null;
+    private string editingClassName = "";
+    private string? editingStudentClass = null;
+    private string? editingStudent = null;
+    private string editingStudentName = "";
+
+    protected override void OnInitialized()
+    {
+        classes = AttendanceService.GetAllClasses();
+        foreach(var c in classes) newStudentName[c.ClassName] = "";
+    }
+
+    private void Refresh()
+    {
+        classes = AttendanceService.GetAllClasses();
+
+        // Rebuild the newStudentName map so bindings don't throw/point to missing keys
+        newStudentName = classes.ToDictionary(c => c.ClassName, c => "");
+
+        StateHasChanged();
+    }
+
+
+    private void AddClass()
+    {
+        if (string.IsNullOrWhiteSpace(newClassName)) return;
+        AttendanceService.AddClass(newClassName.Trim());
+        newStudentName[newClassName.Trim()] = "";
+        newClassName = "";
+        Refresh();
+    }
+
+    private void DeleteClass(string className)
+    {
+        if (!confirm($"Delete class '{className}'? This will also remove teacher info.")) return;
+        AttendanceService.DeleteClass(className);
+        Refresh();
+    }
+
+    private void EditClassName(ClassInfo cls)
+    {
+        editingClass = cls;
+        editingClassName = cls.ClassName;
+    }
+
+    private void SaveClassName()
+    {
+        if (editingClass == null) return;
+        AttendanceService.RenameClass(editingClass.ClassName, editingClassName.Trim());
+        editingClass = null;
+        editingClassName = "";
+        Refresh();
+    }
+
+    private void CancelEdit()
+    {
+        editingClass = null;
+        editingClassName = "";
+    }
+
+    private void AddStudent(string className)
+    {
+        var name = newStudentName.GetValueOrDefault(className)?.Trim();
+        if (string.IsNullOrWhiteSpace(name)) return;
+        AttendanceService.AddStudentToClass(className, name);
+        newStudentName[className] = "";
+        Refresh();
+    }
+
+    private void DeleteStudent(string className, string student)
+    {
+        if (!confirm($"Delete student '{student}' from {className}?")) return;
+        AttendanceService.DeleteStudentFromClass(className, student);
+        Refresh();
+    }
+
+    private void EditStudent(string className, string student)
+    {
+        editingStudentClass = className;
+        editingStudent = student;
+        editingStudentName = student;
+    }
+
+    private void SaveStudentEdit()
+    {
+        if (editingStudentClass == null || editingStudent == null) return;
+        AttendanceService.UpdateStudentInClass(editingStudentClass, editingStudent, editingStudentName.Trim());
+        editingStudent = null;
+        editingStudentClass = null;
+        editingStudentName = "";
+        Refresh();
+    }
+
+    private void CancelStudentEdit()
+    {
+        editingStudent = null;
+        editingStudentClass = null;
+        editingStudentName = "";
+    }
+
+    private void OpenClassDetails(string className)
+    {
+        Navigation.NavigateTo($"/classdetails/{Uri.EscapeDataString(className)}");
+    }
+
+    private bool confirm(string msg)
+    {
+        return true;
+    }
+}

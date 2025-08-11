@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "PY7xxws0wvI=",
+  "success": true,
+  "projectFilePath": "C:\\Siva\\Projects\\AI\\MarkMe\\MarkMe\\MarkMe.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Siva Ramaswami\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.22.1\\microsoft.visualstudio.azure.containers.tools.targets.1.22.1.nupkg.sha512"
+  ],
+  "logs": []
+}
