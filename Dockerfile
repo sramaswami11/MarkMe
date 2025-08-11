@@ -1,7 +1,7 @@
 # =========================
 # Build Stage
 # =========================
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copy everything and restore
@@ -14,7 +14,7 @@ RUN dotnet publish -c Release -o /app/publish
 # =========================
 # Runtime Stage
 # =========================
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 
 # Copy published output from build stage
