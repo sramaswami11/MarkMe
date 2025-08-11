@@ -10,7 +10,7 @@ EXPOSE 80
 
 
 # This stage is used to build the service project
-ROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 COPY ["MarkMe/MarkMe.csproj", "MarkMe/"]
 RUN dotnet restore "MarkMe/MarkMe.csproj"
