@@ -4,21 +4,19 @@
 # For more information, please see https://aka.ms/containercompat
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-nanoserver-1809 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 80
 
 
 # This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:9.0-nanoserver-1809 AS build
-ARG BUILD_CONFIGURATION=Release
+ROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY ["MarkMe.csproj", "MarkMe/"]
-RUN dotnet restore "MarkMe.csproj"
+COPY ["MarkMe/MarkMe.csproj", "MarkMe/"]
+RUN dotnet restore "MarkMe/MarkMe.csproj"
 COPY . .
 WORKDIR "/src/MarkMe"
-RUN dotnet build "./MarkMe.csproj" -c %BUILD_CONFIGURATION% -o /app/build
+RUN dotnet publish "MarkMe.csproj" -c Release -o /app/publish
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
@@ -28,5 +26,6 @@ RUN dotnet publish "./MarkMe.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
+ENV ASPNETCORE_URLS=http://+:${PORT}
 ENTRYPOINT ["dotnet", "MarkMe.dll"]
