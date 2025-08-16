@@ -6,18 +6,13 @@
 
 @inject AttendanceService AttendanceService
 
-<h3>Class Attendance</h3>
+
+
 
 <div class="mb-3 row">
     <div class="col-md-4">
         <label>Select Class:</label>
-        @* <select class="form-select" @bind="selectedClass" @bind:after="LoadStudents">
-            @foreach (var c in classList)
-            {
-                <option value="@c">@c</option>
-            }
-        </select> *@
-        <select class="form-select" @bind="selectedClass" @bind:after="OnClassOrDateChanged">
+          <select class="form-select" @bind="selectedClass" @bind:after="OnClassOrDateChanged">
             @foreach (var c in classList)
             {
                 <option value="@c">@c</option>
@@ -26,7 +21,6 @@
     </div>
     <div class="col-md-3">
         <label>Date:</label>
-        @* <input type="date" class="form-control" @bind="attendanceDate" /> *@
         <input type="date" class="form-control" @bind="attendanceDate" @bind:after="OnClassOrDateChanged" />
     </div>
     <div class="col-md-2 d-flex align-items-end">
@@ -115,9 +109,13 @@
         await AttendanceService.SaveAttendanceByClass(attendanceDate, selectedClass, students);
         saveMessage = "Saved!";
     }
+
+    private async Task SaveData()
+    {
+        await Task.Delay(500); // simulate work
+        saveMessage = "Saved by Mud button!";
+    }
 }
 
 
-@code {
 
-}
